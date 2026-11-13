@@ -63,3 +63,46 @@ def safety_stock_from_history(
         mean_demand, math.sqrt(variance), lead_time_days,
         service_level=service_level, lead_time_std=lead_time_std,
     )
+
+def calculate_safety_stock_by_product(
+    prepared_df,
+    lead_time_days: float = 7,
+    service_level: float = 0.95,
+):
+    """Calculate safety stock separately for each store and product."""
+    required = {"store_id", "product_id", "date", "target_demand"}
+    missing = required - set(prepared_df.columns)
+
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    results = []
+
+    for (store, product), group in prepared_df.groupby(
+        ["store_id", "product_id"]
+    ):
+        daily = (
+            group.groupby("date")["target_demand"]
+            .sum()
+            .sort_index()
+        )
+
+        if len(daily) < 2:
+            continue
+
+        stock = safety_stock_from_history(
+            daily,
+            lead_time_days=lead_time_days,
+            service_level=service_level,
+        )
+
+        results.append({
+            "store_id": store,
+            "product_id": product,
+            "average_daily_demand": round(float(daily.mean()), 2),
+            "safety_stock": stock,
+            "service_level": service_level,
+            "lead_time_days": lead_time_days,
+        })
+
+    return results

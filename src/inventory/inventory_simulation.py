@@ -129,3 +129,69 @@ def compare_inventory_scenarios(
         _, summary = simulate_inventory(demand, dates=dates, **params)
         rows.append({"scenario": name, **summary})
     return pd.DataFrame(rows)
+
+def simulate_inventory_by_product(
+    prepared_df,
+    reorder_results,
+    lead_time_days: int = 7,
+):
+    """Simulate inventory separately for every store-product combination."""
+    required = {
+        "date", "store_id", "product_id",
+        "target_demand", "inventory_level"
+    }
+    missing = required - set(prepared_df.columns)
+
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    reorder_lookup = {
+        (item["store_id"], item["product_id"]): item
+        for item in reorder_results
+    }
+
+    simulations = {}
+
+    for (store, product), group in prepared_df.groupby(
+        ["store_id", "product_id"]
+    ):
+        group = group.sort_values("date")
+
+        daily = (
+            group.groupby("date")
+            .agg(
+                demand=("target_demand", "sum"),
+                inventory=("inventory_level", "first"),
+            )
+            .sort_index()
+        )
+
+        policy = reorder_lookup.get((store, product))
+
+        if policy is None or daily.empty:
+            continue
+
+        average_demand = float(daily["demand"].mean())
+
+        # Assumption: one average lead-time demand per replenishment order.
+        order_quantity = max(
+            1,
+            math.ceil(average_demand * lead_time_days)
+        )
+
+        simulation, summary = simulate_inventory(
+            demand=daily["demand"].tolist(),
+            dates=daily.index.tolist(),
+            initial_inventory=float(daily["inventory"].iloc[0]),
+            reorder_point=policy["reorder_point"],
+            order_quantity=order_quantity,
+            lead_time_days=lead_time_days,
+            safety_stock=policy["safety_stock"],
+        )
+
+        simulations[(store, product)] = {
+            "daily_results": simulation,
+            "summary": summary,
+        }
+
+    return simulations

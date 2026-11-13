@@ -60,3 +60,72 @@ def order_up_to_quantity(
         raise ValueError("Inventory values cannot be negative")
     position = inventory_on_hand + on_order - backorders
     return int(math.ceil(max(0.0, target_stock_level - position)))
+
+def reorder_points_by_product(
+    prepared_df,
+    safety_stock_results,
+    lead_time_days: float = 7,
+):
+    """Calculate reorder points for each store-product combination."""
+    required = {"store_id", "product_id", "date", "target_demand",
+                "inventory_level"}
+    missing = required - set(prepared_df.columns)
+
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    safety_lookup = {
+        (item["store_id"], item["product_id"]): item["safety_stock"]
+        for item in safety_stock_results
+    }
+
+    results = []
+
+    for (store, product), group in prepared_df.groupby(
+        ["store_id", "product_id"]
+    ):
+        daily = (
+            group.groupby("date")["target_demand"]
+            .sum()
+            .sort_index()
+        )
+
+        if len(daily) < 2:
+            continue
+
+        avg_demand = float(daily.mean())
+        stock = safety_lookup.get((store, product))
+
+        if stock is None:
+            continue
+
+        rop = calculate_reorder_point(
+            average_daily_demand=avg_demand,
+            lead_time_days=lead_time_days,
+            safety_stock=stock,
+        )
+
+        current_inventory = float(
+            group.sort_values("date")["inventory_level"].iloc[-1]
+        )
+
+        recommendation = replenishment_recommendation(
+            inventory_on_hand=current_inventory,
+            reorder_point=rop,
+            order_quantity=rop,
+        )
+
+        results.append({
+            "store_id": store,
+            "product_id": product,
+            "average_daily_demand": round(avg_demand, 2),
+            "safety_stock": stock,
+            "reorder_point": rop,
+            "current_inventory": current_inventory,
+            "reorder_required": recommendation["reorder_required"],
+            "recommended_order_quantity":
+                recommendation["recommended_order_quantity"],
+            "status": recommendation["status"],
+        })
+
+    return results

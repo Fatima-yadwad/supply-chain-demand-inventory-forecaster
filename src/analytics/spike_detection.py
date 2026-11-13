@@ -54,3 +54,41 @@ def detect_demand_spikes(
         out["spike_score"] = (out[demand_col] - out["rolling_mean"]) / denom
     out["is_spike"] = out["spike_score"].fillna(0) >= threshold
     return out.reset_index(drop=True)
+def detect_spikes_by_product(prepared_df, window=7, threshold=3.0):
+    """Detect demand spikes separately for each store and product."""
+
+    required = {"date", "store_id", "product_id", "target_demand"}
+    missing = required - set(prepared_df.columns)
+
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    results = []
+
+    for (store, product), group in prepared_df.groupby(
+        ["store_id", "product_id"]
+    ):
+        daily = (
+            group.groupby("date", as_index=False)["target_demand"]
+            .sum()
+            .sort_values("date")
+        )
+
+        detected = detect_demand_spikes(
+            daily,
+            date_col="date",
+            demand_col="target_demand",
+            window=window,
+            threshold=threshold,
+            method="zscore",
+        )
+
+        detected["store_id"] = store
+        detected["product_id"] = product
+
+        results.append(detected)
+
+    if not results:
+        return pd.DataFrame()
+
+    return pd.concat(results, ignore_index=True)

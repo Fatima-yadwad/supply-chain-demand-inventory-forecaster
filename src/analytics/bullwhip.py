@@ -53,3 +53,42 @@ def bullwhip_by_stage(
         ratio = float(variance / baseline) if pd.notna(baseline) and baseline > 0 else float("nan")
         rows.append({"stage": stage, "observations": len(series), "variance": variance, "bullwhip_ratio": ratio})
     return pd.DataFrame(rows).sort_values("stage").reset_index(drop=True)
+def analyse_bullwhip_by_product(prepared_df):
+    """Analyse the bullwhip effect separately for each product."""
+
+    required = {"date", "product_id", "target_demand", "units_ordered"}
+    missing = required - set(prepared_df.columns)
+
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    results = []
+
+    for product, group in prepared_df.groupby("product_id"):
+
+        daily = (
+            group.groupby("date")
+            .agg(
+                customer_demand=("target_demand", "sum"),
+                upstream_orders=("units_ordered", "sum"),
+            )
+            .sort_index()
+        )
+
+        if len(daily) < 2:
+            continue
+
+        ratio = calculate_bullwhip_ratio(
+            daily["customer_demand"],
+            daily["upstream_orders"],
+        )
+
+        results.append({
+            "product_id": product,
+            "demand_variance": daily["customer_demand"].var(),
+            "order_variance": daily["upstream_orders"].var(),
+            "bullwhip_ratio": ratio,
+            "bullwhip_detected": ratio > 1 if pd.notna(ratio) else False,
+        })
+
+    return pd.DataFrame(results)
