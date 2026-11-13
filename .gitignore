@@ -1,11 +1,21 @@
-﻿.venv/
-venv/
-env/
+
+# Python virtual environment
+.venv/
+
+# Python cache files
 __pycache__/
 *.py[cod]
+*.pyc
+
+# Pytest cache
+.pytest_cache/
+
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+
+# Environment variables and secrets
 .env
-.env.*
-.vscode/
-.DS_Store
-Thumbs.db
+
+# Dataset files
+data/raw/*.csv
+data/processed/*.csv
