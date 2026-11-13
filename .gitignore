@@ -1,4 +1,21 @@
+
+# Python virtual environment
 .venv/
+
+# Python cache files
 __pycache__/
+*.py[cod]
 *.pyc
+
+# Pytest cache
+.pytest_cache/
+
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+
+# Environment variables and secrets
+.env
+
+# Dataset files
+data/raw/*.csv
+data/processed/*.csv
