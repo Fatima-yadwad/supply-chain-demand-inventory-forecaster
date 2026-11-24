@@ -1,164 +1,140 @@
-# Supply Chain Demand & Inventory Forecaster
+# SupplyIQ – Supply Chain Demand & Inventory Forecaster
 
-## 1. Project Overview
+## Project Overview
 
-The **Supply Chain Demand & Inventory Forecaster** is a data-driven project designed to analyse historical retail demand, forecast future product demand, and support better inventory management decisions.
+SupplyIQ is an AI-powered supply chain analytics and inventory forecasting platform designed to analyze historical demand, predict future demand, identify inventory risks, and generate replenishment recommendations.
 
-The project aims to help businesses reduce stockouts and overstocking by combining demand forecasting with inventory analytics.
+The platform supports historical dataset analysis and uploaded CSV datasets.
 
-## 2. Project Objectives
+## Key Features
 
-- Analyse historical sales, demand, and inventory data.
-- Identify demand patterns, trends, and seasonality.
-- Forecast future product demand using time-series forecasting models.
-- Calculate inventory metrics such as safety stock and reorder points.
-- Detect unusual demand spikes and fluctuations.
-- Present insights through an interactive dashboard.
+### 1. Supply Chain Dashboard
 
-## 3. Dataset
+- Overall supply chain performance.
+- Product, category, store, and regional analysis.
+- Interactive dashboard filters.
+- Historical sales and demand visualization.
 
-The project uses the **Retail Store Inventory and Demand Forecasting** dataset from Kaggle.
+### 2. AI Demand Forecasting
 
-Dataset: https://www.kaggle.com/datasets/atomicd/retail-store-inventory-and-demand-forecasting
+- 7-day, 15-day, and 30-day demand forecasting.
+- SARIMAX and seasonal naive forecasting approaches.
+- Chronological model validation.
+- Model comparison using MAE, RMSE, and WAPE.
+- Automatic selection of the best-performing forecasting approach.
 
-The dataset contains 76,000 records and 16 columns, including:
+### 3. Inventory Risk Detection
 
-- Date
-- Store ID and Product ID
-- Category and Region
-- Inventory Level
-- Units Sold and Units Ordered
-- Price and Discount
-- Weather Condition and Promotion
-- Competitor Pricing
-- Seasonality and Epidemic
-- Demand
+- Estimated inventory levels.
+- Average daily demand.
+- Stock coverage calculation.
+- Critical, High, Medium, Low, and Overstock classifications.
+- Stockout risk identification.
 
-**Target variable:** `Demand`
+### 4. AI Replenishment Recommendations
 
-The original dataset is stored locally in `data/raw/` and is not included in Git commits.
+- Recommended reorder quantities.
+- Demand-based replenishment planning.
+- Product and store-level recommendations.
 
-### Session CSV uploads
+### 5. Anomaly Detection and AI Insights
 
-The AI Intelligence page can use either the original dataset or a CSV uploaded for the current browser session. Uploads are validated and preprocessed in memory; they do not overwrite or create files beside the original dataset. Uploads expire after one hour of inactivity.
+- Unusual demand spike detection.
+- Demand trend analysis.
+- Inventory warnings.
+- Actionable supply chain insights.
 
-Required columns are `Date`, `Store ID`, `Product ID`, and either `Demand` or `Units Sold`. `Category`, `Region`, and `Inventory Level` are supported optional columns. Dates must be parseable, demand must be numeric and nonnegative, and an uploaded dataset needs at least 14 distinct dates for forecasts. Exact duplicate rows are removed. Inventory and replenishment analysis is unavailable if `Inventory Level` is missing or incomplete.
+### 6. CSV Dataset Upload
 
-CSV uploads are limited to 20 MB and 250,000 rows. The dashboard compares the existing seasonal-naive and SARIMAX approaches with chronological validation and supports 7-, 15-, and 30-day forecasts. Weekly and monthly reports use the same selected dataset and filters; incomplete actual periods are labeled.
+- Upload and validate new CSV datasets.
+- Data preprocessing and schema validation.
+- Analysis using uploaded datasets.
+- Dataset switching between original and uploaded data.
+- Forecast generation using suitable uploaded historical data.
 
-The API accepts uploads at `POST /api/datasets/upload`, exposes upload metadata at `GET /api/datasets/{dataset_id}`, and accepts the returned `dataset_id` on dashboard and `/api/ai` requests. Weekly and monthly AI reports are available at `/api/ai/reports/weekly` and `/api/ai/reports/monthly`.
+### 7. Weekly and Monthly Reports
 
-## 4. Project Modules
+- Historical demand summaries.
+- Forecast summaries.
+- Product and category performance.
+- Regional and store-level comparisons.
+- Inventory risk and replenishment summaries.
 
-1. **Data Loading and Preprocessing:** Load, inspect, clean, and transform the dataset.
-2. **Exploratory Data Analysis:** Understand demand distributions, trends, and patterns.
-3. **Demand Forecasting:** Develop and evaluate SARIMAX and Prophet forecasting models.
-4. **Inventory Analytics:** Calculate safety stock, reorder points, and identify demand spikes.
-5. **Dashboard and Integration:** Combine project outputs into an interactive Streamlit application.
+## Technology Stack
 
-## 5. Technology Stack
+### Frontend
+
+- React
+- Vite
+- JavaScript
+- Recharts
+- CSS
+
+### Backend
 
 - Python
-- Pandas and NumPy
-- Matplotlib
+- FastAPI
+- Pandas
+
+### Machine Learning and Analytics
+
 - SARIMAX
-- Prophet
-- Scikit-learn
-- Streamlit
-- Git and GitHub
+- Seasonal Naive Forecasting
+- Statistical Model Evaluation
+- Anomaly Detection
 
-## 6. Repository Structure
+## Dataset
 
-```text
-supply-chain-demand-inventory-forecaster/
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── notebooks/
-├── reports/
-│   └── figures/
-│
-├── scripts/
-│   └── run_eda.py
-│
-├── src/
-│   └── data/
-│       ├── data_loader.py
-│       └── preprocessing.py
-│
-├── tests/
-│   └── test_preprocessing.py
-│
-├── README.md
-└── .gitignore
-```
+The original historical dataset contains approximately 76,000 records covering January 2022 to January 2024.
 
-## 7. Setup and Execution
+It includes information about:
 
-### Clone the repository
+- Products
+- Stores
+- Categories
+- Regions
+- Dates
+- Demand
+- Inventory
 
-```bash
-git clone https://github.com/Fatima-yadwad/supply-chain-demand-inventory-forecaster.git
-cd supply-chain-demand-inventory-forecaster
-```
+## Forecasting Workflow
 
-### Create and activate a virtual environment
+1. Load the selected dataset.
+2. Validate and preprocess the data.
+3. Apply the selected product, category, store, and region filters.
+4. Prepare historical demand time series.
+5. Train and evaluate available forecasting approaches.
+6. Select the best-performing model.
+7. Generate future demand predictions.
+8. Calculate inventory risks and replenishment recommendations.
+9. Visualize results through interactive charts and reports.
 
-```bash
-python -m venv .venv
-```
+## Running the Project
 
-Windows PowerShell:
+### Backend
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
+.venv\Scripts\activate
+uvicorn backend.main:app --reload
 ```
 
-### Install dependencies
+Backend URL: http://localhost:8000
 
-```bash
-pip install pandas numpy matplotlib pytest
+API documentation: http://localhost:8000/docs
+
+### Frontend
+
+```powershell
+cd frontend
+npm install
+npm run dev
 ```
 
-### Add the dataset
+Frontend URL: http://localhost:5173
 
-Download the Kaggle dataset and place `sales_data.csv` inside:
+## Important Notes
 
-```text
-data/raw/
-```
-
-### Run exploratory data analysis
-
-```bash
-python -u scripts/run_eda.py
-```
-
-### Run preprocessing tests
-
-```bash
-python -m pytest tests/test_preprocessing.py -v
-```
-
-## 8. Current Development Status
-
-- [x] Dataset loading and inspection
-- [x] Data cleaning and preprocessing
-- [x] Date and demand lag feature generation
-- [x] Exploratory data analysis
-- [x] Preprocessing unit tests
-- [ ] SARIMAX forecasting
-- [ ] Prophet forecasting and model comparison
-- [ ] Inventory analytics
-- [ ] Streamlit dashboard
-- [ ] Final integration and deployment
-
-## 9. Team Contributions
-
-The project is being developed collaboratively, with responsibilities divided across data engineering, forecasting, inventory analytics, and application development.
-
-## 10. Expected Outcome
-
-The final system aims to provide demand forecasts and inventory insights that can support informed replenishment decisions, improve inventory planning, and reduce supply chain inefficiencies.
+- Forecasts are estimates based on historical data.
+- Inventory calculations based on historical records are estimates, not live warehouse stock.
+- Forecast accuracy depends on the quality and amount of uploaded historical data.
+- Uploaded datasets must satisfy the application's validation requirements.
