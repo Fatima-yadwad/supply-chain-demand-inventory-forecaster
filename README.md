@@ -38,6 +38,16 @@ The dataset contains 76,000 records and 16 columns, including:
 
 The original dataset is stored locally in `data/raw/` and is not included in Git commits.
 
+### Session CSV uploads
+
+The AI Intelligence page can use either the original dataset or a CSV uploaded for the current browser session. Uploads are validated and preprocessed in memory; they do not overwrite or create files beside the original dataset. Uploads expire after one hour of inactivity.
+
+Required columns are `Date`, `Store ID`, `Product ID`, and either `Demand` or `Units Sold`. `Category`, `Region`, and `Inventory Level` are supported optional columns. Dates must be parseable, demand must be numeric and nonnegative, and an uploaded dataset needs at least 14 distinct dates for forecasts. Exact duplicate rows are removed. Inventory and replenishment analysis is unavailable if `Inventory Level` is missing or incomplete.
+
+CSV uploads are limited to 20 MB and 250,000 rows. The dashboard compares the existing seasonal-naive and SARIMAX approaches with chronological validation and supports 7-, 15-, and 30-day forecasts. Weekly and monthly reports use the same selected dataset and filters; incomplete actual periods are labeled.
+
+The API accepts uploads at `POST /api/datasets/upload`, exposes upload metadata at `GET /api/datasets/{dataset_id}`, and accepts the returned `dataset_id` on dashboard and `/api/ai` requests. Weekly and monthly AI reports are available at `/api/ai/reports/weekly` and `/api/ai/reports/monthly`.
+
 ## 4. Project Modules
 
 1. **Data Loading and Preprocessing:** Load, inspect, clean, and transform the dataset.
