@@ -23,6 +23,38 @@ The platform supports historical dataset analysis and uploaded CSV datasets.
 - Model comparison using MAE, RMSE, and WAPE.
 - Automatic selection of the best-performing forecasting approach.
 
+### AI, Machine Learning & Supply Chain Optimization
+
+**Time-Series Forecasting Models**
+
+- **SARIMAX:** Seasonal time-series forecasting to capture demand trends and seasonality.
+- **Prophet:** Forecasting model designed to capture trends, seasonality, and changing patterns.
+- **Seasonal Naive:** Baseline forecasting model using historical seasonal demand patterns.
+- **Model Evaluation:** Chronological validation and model comparison.
+
+**Inventory Optimization**
+
+- Safety Stock Calculation
+- Reorder Point Calculation
+- Inventory Coverage Analysis
+- Replenishment Quantity Recommendations
+- Stockout Risk Identification
+
+**Supply Chain Analytics**
+
+- **Bullwhip Effect Analysis:** Evaluates demand variability and amplification across the supply chain.
+- Demand Variability Analysis
+- Demand Anomaly Detection
+- Demand Spike Identification
+
+**Model Performance Metrics**
+
+- MAE – Mean Absolute Error
+- RMSE – Root Mean Squared Error
+- WAPE – Weighted Absolute Percentage Error
+
+The project includes dedicated Python modules and Jupyter notebooks for forecasting experiments, inventory optimization, and supply chain analytics.
+
 ### 3. Inventory Risk Detection
 
 - Estimated inventory levels.
